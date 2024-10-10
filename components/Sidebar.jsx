@@ -38,7 +38,7 @@ const Sidebar = ({ showSidebar }) => {
           <a href="#">
             <img
               className="h-6 w-6 outline outline-green-500 outline-offset-2 rounded-full"
-              src={session?.user.image}
+              src={session.user.image}
               alt="svelte logo"
             />
           </a>

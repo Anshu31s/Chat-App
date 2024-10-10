@@ -7,10 +7,10 @@ import { Mic, Camera, PhoneOff, MicOff, CameraOff } from "lucide-react";
 const CallInterface = () => {
   const { selectedFriend } = ChatStore();
   const { session } = useSession();
-  const [CameraOn, setCameraOn] = useState(false);
-  const [MicOn, setMicOn] = useState(true);
+  const [CameraOn, setCamera] = useState(false);
+  const [MicOn, setMic] = useState(true);
   const [localStream, setLocalStream] = useState(null);
-  const [remoteCameraOn, setRemoteCameraOn] = useState(false);
+  const [remoteCamera, setremoteCamera] = useState(false);
 
   const remoteUserId = selectedFriend?.id;
   const localUserId = session?.user?.id;
@@ -42,7 +42,7 @@ const CallInterface = () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: MicOn });
         setLocalStream(stream);
-        setCameraOn(true);
+        setCamera(true);
 
         if (remoteVideo.current) {
           remoteVideo.current.srcObject = stream;
@@ -56,7 +56,7 @@ const CallInterface = () => {
     } else {
       const videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) videoTrack.stop();
-      setCameraOn(false);
+      setCamera(false);
     }
   };
 
@@ -64,7 +64,7 @@ const CallInterface = () => {
     if (localStream) {
       localStream.getAudioTracks().forEach(track => (track.enabled = !MicOn));
     }
-    setMicOn((prev) => !prev);
+    setMic((prev) => !prev);
   };
 
   const endCall = () => {
@@ -72,11 +72,11 @@ const CallInterface = () => {
       localStream.getTracks().forEach((track) => track.stop());
     }
     setLocalStream(null);
-    setCameraOn(false);
-    setMicOn(false);
-    setCameraOn(false);
+    setCamera(false);
+    setMic(false);
+    setCamera(false);
   };
-  const bothCamerasOff = !CameraOn && !remoteCameraOn;
+  const bothCamerasOff = !CameraOn && !remoteCamera;
 
   return (
     <div className=" bg-black">

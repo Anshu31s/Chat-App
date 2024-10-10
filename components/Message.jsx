@@ -100,6 +100,14 @@ const Message = ({ showMessage }) => {
       setMessage("");
     }
   };
+
+  const handleCall = () => {
+    let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
+     width=800,height=700,left=-1000,top=-1000`;
+
+    open("/call", "test", params);
+  };
+
   const currentMessages = messages[receiverId] || [];
   if (!showMessage) {
     return null;
@@ -134,12 +142,36 @@ const Message = ({ showMessage }) => {
                   <Video onClick={openCallNotification} size={24} strokeWidth={1} />
                 </button>
                 <button className="">
-                  <Phone size={20} strokeWidth={1} />
+                  <Phone onClick={handleCall} size={20} strokeWidth={1} />
                 </button>
               </div>
-              <button className="p-2 rounded-md hover:bg-gray-200">
-                <Info size={24} strokeWidth={1} />
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="p-2 rounded-md hover:bg-gray-200">
+                  <Info size={24} strokeWidth={1} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className='mr-4'>
+                  <DropdownMenuItem className="flex w-64 border-none flex-col items-center justify-center rounded-lg border pb-10">
+                      <img
+                        class="mb-3 h-24 w-24 rounded-full shadow-lg"
+                        src="https://flowbite.com/docs/images/people/profile-picture-3.jpg"
+                        alt="Bonnie image"
+                      />
+                      <h3 class="mb-1 text-xl capitalize font-medium text-gray-900">
+                        {selectedFriend.name}
+                      </h3>
+                      <span class="text-sm lowercase text-gray-500">
+                        {selectedFriend.email}
+                      </span>
+
+                      <a
+                        href="#"
+                        className="mt-5 inline-flex items-center rounded-lg bg-blue-500 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-400 focus:ring-4 focus:ring-blue-400"
+                      >
+                        Remove
+                      </a>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 

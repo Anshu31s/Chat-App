@@ -12,16 +12,16 @@ const CallNotification = ({onDecline}) => {
   return (
     <div>
       <div className="fixed bg-opacity-50 inset-0 w-full flex justify-center items-center h-screen z-50 bg-black">
-        <div className="bg-white shadow-lg text-white rounded-lg p-2 border">
+        <div className="bg-white shadow-lg shadow-black/20 text-white rounded-lg p-2 border">
           <div className="flex flex-col items-center justify-center shadow-inner shadow-gray-200 px-20 py-2 border rounded-xl ">
             <img
               src="https://via.placeholder.com/150"
               alt="Profile"
               className="rounded-full w-24 h-24"
             />
-            <div className="text-center">
-              <h2 className="text-xl mt-2">Users</h2>
-              <p className=" ml-2 text-sm">Ringing...</p>
+            <div className="text-center text-black">
+              <h2 className="text-sm mt-2 font-thin">Users</h2>
+              <p className=" ml-2 text-xs font-thin">Ringing...</p>
             </div>
           </div>
           <div className="flex justify-evenly p-2">
