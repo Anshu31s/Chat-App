@@ -99,8 +99,8 @@ const Sidebar = ({ showSidebar }) => {
                   />
                   <div className="w-full flex justify-between ml-2">
                     <div>
-                      <h4 className="text-md">{user.name}</h4>
-                      <p className="text-xs text-gray-400">{user.email}</p>
+                      <p className="capitalize text-md">{user.name}</p>
+                      <p className="text-xs lowercase text-gray-400">{user.email}</p>
                     </div>
                     <button onClick={() => addFriend(user.id)}>
                       <UserRoundPlus />
@@ -134,8 +134,8 @@ const Sidebar = ({ showSidebar }) => {
                     className="w-full flex justify-between ml-2"
                   >
                     <div className="text-left">
-                      <h4 className="text-md">{friend.name}</h4>
-                      <p className="text-xs text-gray-400">start convo</p>
+                      <h4 className="text-md capitalize">{friend.name}</h4>
+                      <p className="text-xs text-gray-400 capitalize">start convo</p>
                     </div>
                   </button>
                 </div>

@@ -128,11 +128,11 @@ const Message = ({ showMessage }) => {
                 className="rounded-full w-12 h-12 mr-3"
               />
               <span>
-                <h2 className="text-md font-semibold">{selectedFriend.name}</h2>
+                <h2 className="text-md capitalize font-semibold">{selectedFriend.name}</h2>
                 {isFriendOnline ? (
-                  <p className="text-xs text-green-400">online</p>
+                  <p className="text-xs capitalize text-green-400">online</p>
                 ) : (
-                  <p className="text-xs">offline</p>
+                  <p className="text-xs capitalize">offline</p>
                 )}
               </span>
             </div>
@@ -153,7 +153,7 @@ const Message = ({ showMessage }) => {
                   <DropdownMenuItem className="flex w-64 border-none flex-col items-center justify-center rounded-lg border pb-10">
                       <img
                         class="mb-3 h-24 w-24 rounded-full shadow-lg"
-                        src="https://flowbite.com/docs/images/people/profile-picture-3.jpg"
+                        src={selectedFriend.image}
                         alt="Bonnie image"
                       />
                       <h3 class="mb-1 text-xl capitalize font-medium text-gray-900">
