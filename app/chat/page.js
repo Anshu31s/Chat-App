@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Message from "@/components/Message";
 import { useSession } from "next-auth/react";
+import Loader from "@/components/Loader";
 const page = () => {
   const { status } = useSession();
   const selectedFriend = ChatStore((state) => state.selectedFriend);
@@ -25,8 +26,8 @@ const page = () => {
 
   if (status === "loading") {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-lg font-semibold">Loading...</div>
+      <div>
+        <Loader />
       </div>
     );
   }

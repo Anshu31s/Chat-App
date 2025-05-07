@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]/route";
+
 const prisma = new PrismaClient();
 
 export async function POST(req) {
@@ -28,7 +29,7 @@ export async function POST(req) {
       },
       data: {
         friends: {
-          push: friend, 
+          push: friend,
         },
       },
     });
@@ -40,7 +41,7 @@ export async function POST(req) {
       },
       data: {
         friends: {
-          push: currentUser, 
+          push: currentUser,
         },
       },
     });
@@ -54,10 +55,9 @@ export async function POST(req) {
   }
 }
 
-
 export async function GET(req) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
@@ -88,6 +88,72 @@ export async function GET(req) {
     });
 
     return NextResponse.json(friendsDetails, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function DELETE(req) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const currentUserId = session.user.id;
+    const { friendId } = await req.json();
+
+    if (!friendId) {
+      return NextResponse.json(
+        { message: "Friend userId is missing" },
+        { status: 400 }
+      );
+    }
+
+    // Fetch current user's friends
+    const currentUser = await prisma.user.findUnique({
+      where: { id: currentUserId },
+      select: { friends: true },
+    });
+
+    if (!currentUser || !currentUser.friends.includes(friendId)) {
+      return NextResponse.json(
+        { message: "Friend not found in your friends list" },
+        { status: 404 }
+      );
+    }
+
+    // Remove friendId from current user's friends
+    const updatedUser = await prisma.user.update({
+      where: { id: currentUserId },
+      data: {
+        friends: {
+          set: currentUser.friends.filter((id) => id !== friendId),
+        },
+      },
+    });
+
+    // Remove currentUserId from friend's friends
+    const friend = await prisma.user.findUnique({
+      where: { id: friendId },
+      select: { friends: true },
+    });
+
+    if (friend) {
+      await prisma.user.update({
+        where: { id: friendId },
+        data: {
+          friends: {
+            set: friend.friends.filter((id) => id !== currentUserId),
+          },
+        },
+      });
+    }
+
+    return NextResponse.json("Friend removed successfully", { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
