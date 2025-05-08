@@ -84,6 +84,7 @@ export async function GET(req) {
         name: true,
         email: true,
         image: true,
+        lastOnline:true,
       },
     });
 

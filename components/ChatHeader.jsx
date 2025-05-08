@@ -7,17 +7,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ChatStore from "@/(store)/ChatStore";
 import axios from "axios";
-
-const ChatHeader = ({
-  isFriendOnline,
-  openCallNotification,
-  handleCall,
-}) => {
-  const { selectedFriend } = ChatStore();
+import { DateTimeFormatter } from "./hooks/DateTimeFormatter";
+const ChatHeader = ({ openCallNotification, handleCall }) => {
+  const { selectedFriend, onlineUsers, typingStatus } = ChatStore();
+  const receiverId = selectedFriend?.id;
+  const isFriendOnline = onlineUsers.includes(receiverId);
+  const isTyping = typingStatus[receiverId] || false;
   const clearSelectedFriend = ChatStore((state) => state.clearSelectedFriend);
+  const { formatDate } = DateTimeFormatter();
 
   const deleteFriendAndChats = async () => {
-    if (!confirm(`Are you sure you want to remove ${selectedFriend.name} and delete your conversation?`)) {
+    if (
+      !confirm(
+        `Are you sure you want to remove ${selectedFriend.name} and delete your conversation?`
+      )
+    ) {
       return;
     }
 
@@ -31,7 +35,10 @@ const ChatHeader = ({
 
       clearSelectedFriend();
     } catch (error) {
-      console.error("Error removing friend or deleting chats:", error.response?.data?.message || error.message);
+      console.error(
+        "Error removing friend or deleting chats:",
+        error.response?.data?.message || error.message
+      );
       alert("Failed to remove friend or delete chats. Please try again.");
     }
   };
@@ -43,18 +50,18 @@ const ChatHeader = ({
           <ArrowLeft />
         </button>
         <img
-          src={selectedFriend.image}
+          src={selectedFriend.image || "/profile.jpg"}
           alt="Profile"
-          className="rounded-full w-12 h-12 mr-3"
+          className="rounded-full w-10 h-10 mr-3"
         />
-        <span>
-          <h2 className="text-md capitalize font-semibold">
-            {selectedFriend.name}
-          </h2>
-          {isFriendOnline ? (
-            <p className="text-xs capitalize text-green-400">online</p>
+        <span className="text-xs">
+          <h2 className="text-[0.90rem] font-bold">{selectedFriend.name}</h2>
+          {isTyping ? (
+            "typing..."
+          ) : isFriendOnline ? (
+            <p className="text-green-500">online</p>
           ) : (
-            <p className="text-xs capitalize">offline</p>
+            `last seen ${formatDate(selectedFriend.lastOnline)}`
           )}
         </span>
       </div>

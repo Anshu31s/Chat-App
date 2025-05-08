@@ -16,6 +16,7 @@ model User {
   friends          String[]  @db.ObjectId
   accounts         Account[]
   sessions         Session[]
+  lastOnline       DateTime?
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
   createdAt        DateTime  @default(now())
@@ -62,9 +63,9 @@ model Message {
   message     String
   messageType String
   time        DateTime @default(now())
-
-  sender   User @relation("SentMessages", fields: [senderId], references: [id])
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  read        Boolean  @default(false)
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

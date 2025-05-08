@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Search, UserRoundPlus, LogOut, MessageSquareText } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import useUnreadMessages from "./hooks/useUnreadMessages";
 import { useSession, signOut } from "next-auth/react";
 import { useDebounceCallback } from "usehooks-ts";
 import GetUser from "./hooks/GetUser";
@@ -20,6 +20,12 @@ const Sidebar = ({ showSidebar }) => {
   const setSelectedFriend = ChatStore((state) => state.setSelectedFriend);
   const [clickedUsers, setClickedUsers] = useState(new Set());
   const selectedFriend = ChatStore((state) => state.selectedFriend);
+  const { unreadMessages } = ChatStore();
+
+  // Fetch unread message counts
+  const userId = session?.user?.id;
+  const { error: unreadError, refetch: refetchUnreadCounts } =
+    useUnreadMessages(userId);
 
   const handleAddFriend = async (friendId) => {
     if (clickedUsers.has(friendId)) return;
@@ -36,19 +42,23 @@ const Sidebar = ({ showSidebar }) => {
     }
   };
 
+  // Refetch unread counts after selecting a friend
+  const handleSelectFriend = (friend) => {
+    setSelectedFriend(friend);
+    setTimeout(() => refetchUnreadCounts(), 250); // Delay to ensure POST completes
+  };
+
   if (!showSidebar) return null;
 
   return (
-    <div className="border-black flex flex-col-reverse w-full md:flex-row bg-gray-100 text-black border-x md:w-[25%] h-full fixed z-10">
+    <div className="border-black flex flex-col-reverse w-full md:flex-row bg-gray-100 text-black border-x md:w-[25%] h-full fixed">
       <aside className="fixed md:static flex flex-row md:flex-col max-[768px]:p-5 max-[768px]:justify-evenly md:w-[14%] w-full md:py-4 items-center bg-gray-200 text-gray-800 shadow">
-        {session?.user?.image && (
-          <a href="#">
-            <img
-              className="h-6 w-6 outline outline-green-500 outline-offset-2 rounded-full"
-              src={session.user.image}
-              alt="user Avatar"
-            />
-          </a>
+        {session?.user && (
+          <img
+            className="h-8 w-8 outline outline-green-500 outline-offset-2 rounded-full"
+            src={session.user.image || "/profile.jpg"}
+            alt="user Avatar"
+          />
         )}
         <ul className="md:flex-grow">
           <li className="max-[768px]:ml-5 md:mt-5">
@@ -63,11 +73,11 @@ const Sidebar = ({ showSidebar }) => {
       </aside>
 
       <div className="md:w-full">
-        <header class="p-4 flex justify-between items-center">
-          <h2 class="text-xl font-semibold text-gray-700">Chats</h2>
+        <header className="p-4 flex justify-between items-center">
+          <h2 className="text-xl font-semibold text-gray-700">Chats</h2>
           <button
             id="close-sidebar-btn"
-            class="md:hidden text-gray-600 hover:text-gray-800"
+            className="md:hidden text-gray-600 hover:text-gray-800"
             aria-label="Close sidebar"
           ></button>
         </header>
@@ -86,7 +96,7 @@ const Sidebar = ({ showSidebar }) => {
           </div>
         </div>
 
-        <div className="p-2 h-[calc(100vh-160px)] overflow-y-auto">
+        <div className="p-2 h-[calc(100vh-160px)] overflow-y-auto overflow-x-hidden">
           {query ? (
             <>
               {loadingUsers ? (
@@ -95,7 +105,7 @@ const Sidebar = ({ showSidebar }) => {
                     key={i}
                     className="flex items-center space-x-4 space-y-4"
                   >
-                    <Skeleton className="h-12 w-12 rounded-full bg-gray-300" />
+                    <Skeleton className="h-8 w-8 md:h-12 md:w-12 rounded-full bg-gray-300" />
                     <div className="space-y-2">
                       <Skeleton className="h-4 w-[250px] bg-gray-300" />
                       <Skeleton className="h-4 w-[200px] bg-gray-300" />
@@ -115,7 +125,7 @@ const Sidebar = ({ showSidebar }) => {
                     className="flex items-center p-4 hover:bg-gray-300 rounded-lg"
                   >
                     <img
-                      src={user.image}
+                      src={user.image || "/profile.jpg"}
                       alt={user.name}
                       className="rounded-full outline outline-gray-500 w-12 h-12 mr-3"
                     />
@@ -160,13 +170,16 @@ const Sidebar = ({ showSidebar }) => {
                 friends.map((friend) => (
                   <button
                     key={friend.id}
-                    onClick={() => setSelectedFriend(friend)}
-                    className={`flex items-center p-3 rounded-lg w-full text-left transition-colors ${
-                      selectedFriend ? "bg-gray-300" : "hover:bg-gray-200"
+                    onClick={() => handleSelectFriend(friend)}
+                    aria-selected={selectedFriend?.id === friend.id}
+                    className={`flex items-center p-3 m-1 rounded-lg w-full text-left transition-colors ${
+                      selectedFriend?.id === friend.id
+                        ? "bg-gray-300"
+                        : "hover:bg-gray-200"
                     }`}
                   >
                     <img
-                      src={friend.image}
+                      src={friend.image || "/profile.jpg"}
                       alt={friend.name}
                       className="rounded-full outline outline-gray-500 w-10 h-10 mr-3"
                     />
@@ -179,6 +192,11 @@ const Sidebar = ({ showSidebar }) => {
                           start convo
                         </p>
                       </div>
+                      {unreadMessages[friend.id] > 0 && (
+                        <span className="w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                          {unreadMessages[friend.id]}
+                        </span>
+                      )}
                     </div>
                   </button>
                 ))

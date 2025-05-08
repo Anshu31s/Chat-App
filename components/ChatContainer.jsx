@@ -3,55 +3,65 @@ import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
+import { DateTimeFormatter } from "./hooks/DateTimeFormatter";
 const ChatContainer = ({ currentMessages }) => {
   const selectedFriend = ChatStore((state) => state.selectedFriend);
   const { data: session } = useSession();
   const messageEndRef = useRef(null);
-
+  const { formatDate } = DateTimeFormatter();
   // 🔹 Scroll to bottom on new message
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [currentMessages]);
   return (
     <div
-      className="flex flex-col-reverse h-[83vh]  bg-gray-200 rounded-lg shadow-lg bg-contain bg-center"
+      className="flex flex-col-reverse min-h-[83vh]  h-auto  max-h-[84vh]  bg-gray-200 rounded-lg shadow-lg bg-contain bg-center"
       style={{ backgroundImage: "url('/mobile.png')" }}
     >
       <div className="overflow-y-auto">
         {currentMessages.map((msg, index) => {
           if (msg.type === "incoming") {
             return (
-              <div key={index} className="flex items-center mb-2">
+              <div
+                key={index}
+                className="flex items-center justify-start mb-4 ml-2"
+              >
                 <img
-                  className="w-8 h-8 rounded-full ml-2 shadow-md"
-                  src={selectedFriend.image}
+                  className="w-8 h-8 rounded-full mr-2 shadow-md"
+                  src={selectedFriend.image || "/profile.jpg"}
                   alt="Sender Avatar"
                 />
-                <div className="flex flex-col select-text">
-                  <div className="bg-blue-500 text-white rounded-lg p-2 shadow mb-2 max-w-sm">
+                <div className="flex select-text items-end bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-2 shadow-lg max-w-md hover:shadow-xl">
+                  <div className="text-white text-sm">
                     <Markdown remarkPlugins={[remarkGfm]}>
                       {msg.message}
                     </Markdown>
                   </div>
-                  <p className="text-[10px]">{msg.time}</p>
+                  <p className="text-[8px] mx-3 text-blue-100 ">
+                    {formatDate(msg.time)}
+                  </p>
                 </div>
               </div>
             );
           } else {
             return (
-              <div key={index} className="flex items-center justify-end mb-2">
-                <div className="flex flex-col">
-                  <div className="bg-blue-500 text-white rounded-lg p-2 shadow mb-2 max-w-sm select-text">
+              <div
+                key={index}
+                className="flex items-center justify-end mb-4 mr-2"
+              >
+                <div className="flex select-text items-end bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-2 shadow-lg max-w-md hover:shadow-xl">
+                  <div className="text-white text-sm">
                     <Markdown remarkPlugins={[remarkGfm]}>
                       {msg.message}
                     </Markdown>
                   </div>
-                  <p className="text-[10px] select-text">{msg.time}</p>
+                  <p className="text-[8px] mx-3 text-blue-100 ">
+                    {formatDate(msg.time)}
+                  </p>
                 </div>
                 <img
                   className="w-8 h-8 rounded-full ml-2 shadow-md"
-                  src={session.user.image}
+                  src={session.user.image || "/profile.jpg"}
                   alt="Avatar"
                 />
               </div>

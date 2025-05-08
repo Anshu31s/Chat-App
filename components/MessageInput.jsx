@@ -17,7 +17,7 @@ import {
 import EmojiPicker from "emoji-picker-react";
 import { useRef, useState } from "react";
 
-const MessageInput = ({ message, setMessage, sendMessage }) => {
+const MessageInput = ({ message, setMessage, sendMessage,inputId }) => {
   const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -151,8 +151,17 @@ const MessageInput = ({ message, setMessage, sendMessage }) => {
           rows="1"
           placeholder="Type a message"
           className="w-full resize-none px-4 py-2 mx-2 bg-transparent border-none outline-none"
+          id={inputId}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage();
+            }
+          }}
+          onFocus={() => setShowEmojiPicker(false)}
+          aria-label="Type a message"
         />
 
         {message || previewUrl ? (

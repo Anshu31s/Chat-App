@@ -81,17 +81,39 @@ app.prepare().then(() => {
         }
       }
     );
+    // STEP 11.1: Handle typing events
+    socket.on("typing", ({ senderId, receiverId, isTyping }) => {
+      const receiverSocketId = users.get(receiverId);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("typing", { senderId, isTyping });
+      }
+    });
 
     // STEP 12: Handle user disconnection
-    socket.on("disconnect", () => {
-      // Find the userId that matches the disconnected socket ID
-      const userId = [...users.entries()].find(
-        ([_, id]) => id === socket.id
-      )?.[0];
-      if (userId) {
-        users.delete(userId); // Remove user from online list
-        console.log(`User ${userId} disconnected`);
-        broadcastOnlineUsers(); // Update others with new user list
+    socket.on("disconnect", async () => {
+      try {
+        // Find the userId that matches the disconnected socket ID
+        const userId = [...users.entries()].find(
+          ([_, id]) => id === socket.id
+        )?.[0];
+
+        if (userId) {
+          // Update user status in the database
+          await prisma.user.update({
+            where: { id: userId },
+            data: {
+              lastOnline: new Date(),
+            },
+          });
+
+          users.delete(userId); // Remove user from online list
+          console.log(`User ${userId} disconnected`);
+
+          // Broadcast updated online users list
+          broadcastOnlineUsers();
+        }
+      } catch (error) {
+        console.error("Error handling disconnect:", error);
       }
     });
   });

@@ -1,9 +1,10 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import ChatStore from "@/(store)/ChatStore";
 import { useSession } from "next-auth/react";
-import { socket } from "@/components/socket";
 import axios from "axios";
+import ChatStore from "@/(store)/ChatStore";
+import { socket } from "@/components/socket";
 
 import ChatHeader from "./ChatHeader";
 import ChatContainer from "./ChatContainer";
@@ -13,37 +14,107 @@ import NoChatSelected from "./NoChatSelected";
 
 const Message = ({ showMessage }) => {
   // ================================
-  // 🔹 State Variables
+  // 🔹 1. State Initialization
   // ================================
 
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState({});
-  const [onlineUsers, setOnlineUsers] = useState([]);
-  const [callNotification, setCallNotification] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const {
+    selectedFriend,
+    setOnlineUsers,
+    setTypingStatus,
+    addUnreadMessage,
+    clearUnreadMessages,
+  } = ChatStore(); // Chat store for selected friend and online users
+  const { data: session } = useSession(); // User session from NextAuth
 
-  const { selectedFriend } = ChatStore();
-  const { data: session } = useSession();
+  const [message, setMessage] = useState(""); // Input message state
+  const [messages, setMessages] = useState({}); // Messages per receiver
+  const [callNotification, setCallNotification] = useState(false); // Call notification visibility
+  const [loading, setLoading] = useState(false); // Loading state for fetching messages
+  const [error, setError] = useState(null); // Error state for message fetching
 
-  const senderId = session?.user?.id;
-  const receiverId = selectedFriend?.id;
-  const isFriendOnline = onlineUsers.includes(receiverId);
-
-  
-  // ================================
-  // 🔹 Call Notification Handlers
-  // ================================
-  const openCallNotification = () => {
-    setCallNotification(true);
-  };
-
-  const closeCallNotification = () => {
-    setCallNotification(false);
-  };
+  const senderId = session?.user?.id; // Current user ID
+  const receiverId = selectedFriend?.id; // Selected friend ID
+  const currentMessages = messages[receiverId] || []; // Messages for the current receiver
 
   // ================================
-  // 🔹 Fetch Messages from Backend
+  // 🔹 2. Socket Setup (Join, Online Users, Message Receiving)
+  // ================================
+  useEffect(() => {
+    if (!senderId) return;
+
+    // Join socket with user ID
+    socket.emit("Join", { userId: senderId });
+
+    // Update online users
+    socket.on("onlineUsers", (onlineUserIds) => {
+      setOnlineUsers(onlineUserIds);
+    });
+
+    // Receive private messages
+    socket.on(
+      "privateMessage",
+      ({ senderId, message, time, messageType, type }) => {
+        setMessages((prevMessages) => ({
+          ...prevMessages,
+          [senderId]: [
+            ...(prevMessages[senderId] || []),
+            { senderId, message, time, messageType, type },
+          ],
+        }));
+        if (senderId !== receiverId) {
+          ChatStore.getState().addUnreadMessage(senderId);
+        }
+      }
+    );
+    // Receive typing events
+    socket.on("typing", ({ senderId, isTyping }) => {
+      setTypingStatus(senderId, isTyping); // Update typing status in store
+    });
+    // Cleanup socket listeners
+    return () => {
+      socket.off("privateMessage");
+      socket.off("onlineUsers");
+    };
+  }, [senderId, receiverId, setOnlineUsers, setTypingStatus, addUnreadMessage]);
+
+  // ================================
+  // 🔹 4. Handle Typing Events
+  // ================================
+  useEffect(() => {
+    if (!senderId || !receiverId) return;
+
+    let typingTimeout;
+
+    const handleTyping = () => {
+      // Emit typing start
+      socket.emit("typing", { senderId, receiverId, isTyping: true });
+
+      // Clear previous timeout
+      clearTimeout(typingTimeout);
+
+      // Set timeout to stop typing after 2 seconds of inactivity
+      typingTimeout = setTimeout(() => {
+        socket.emit("typing", { senderId, receiverId, isTyping: false });
+      }, 2000);
+    };
+
+    // Add event listener for input changes
+    const inputElement = document.getElementById("message-input");
+    if (inputElement) {
+      inputElement.addEventListener("input", handleTyping);
+    }
+
+    // Cleanup
+    return () => {
+      if (inputElement) {
+        inputElement.removeEventListener("input", handleTyping);
+      }
+      clearTimeout(typingTimeout);
+    };
+  }, [senderId, receiverId, message]);
+
+  // ================================
+  // 🔹 4. Fetch Messages from Backend
   // ================================
   useEffect(() => {
     if (!senderId || !receiverId) return;
@@ -73,14 +144,39 @@ const Message = ({ showMessage }) => {
     loadMessages();
   }, [senderId, receiverId]);
 
+  // Mark messages as read when selecting a friend
+  useEffect(() => {
+    if (!senderId || !receiverId) return;
+
+    const markMessagesAsRead = async () => {
+      try {
+        const response = await axios.post("/api/messages", {
+          userId: senderId,
+          friendId: receiverId,
+        });
+        if (response.data.success) {
+          ChatStore.getState().clearUnreadMessages(receiverId);
+          // Trigger a refetch of unread counts (optional, see Sidebar)
+        } else {
+          throw new Error("Failed to mark messages as read");
+        }
+      } catch (error) {
+        console.error("Error marking messages as read:", error);
+        setError("Failed to mark messages as read. Please try again.");
+      }
+    };
+
+    markMessagesAsRead();
+  }, [senderId, receiverId]);
   // ================================
-  // 🔹 Send Message
+  // 🔹 5. Message Sending Handler
   // ================================
   const sendMessage = () => {
     const time = new Date().toISOString();
     const messageType = "text";
 
     if (receiverId && message && senderId) {
+      // Emit message via socket
       socket.emit("privateMessage", {
         senderId,
         receiverId,
@@ -89,6 +185,7 @@ const Message = ({ showMessage }) => {
         time,
       });
 
+      // Update local messages state
       setMessages((prevMessages) => ({
         ...prevMessages,
         [receiverId]: [
@@ -103,54 +200,31 @@ const Message = ({ showMessage }) => {
         ],
       }));
 
+      // Clear input field
       setMessage("");
+      socket.emit("typing", { senderId, receiverId, isTyping: false });
     }
   };
 
   // ================================
-  // 🔹 Socket Setup (Join, Online Users, Message Receiving)
+  // 🔹 6. Call Notification Handlers
   // ================================
-  useEffect(() => {
-    if (senderId) {
-      socket.emit("Join", { userId: senderId });
-    }
+  const openCallNotification = () => {
+    setCallNotification(true);
+  };
 
-    socket.on("onlineUsers", (onlineUserIds) => {
-      setOnlineUsers(onlineUserIds);
-    });
+  const closeCallNotification = () => {
+    setCallNotification(false);
+  };
 
-    socket.on(
-      "privateMessage",
-      ({ senderId, message, time, messageType, type }) => {
-        setMessages((prevMessages) => ({
-          ...prevMessages,
-          [receiverId]: [
-            ...(prevMessages[receiverId] || []),
-            { senderId, message, time, messageType, type },
-          ],
-        }));
-      }
-    );
-
-    return () => {
-      socket.off("privateMessage");
-      socket.off("onlineUsers");
-    };
-  }, [senderId, receiverId]);
-
-  // ================================
-  // 🔹 Initiate Call Handler
-  // ================================
   const handleCall = () => {
     let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
      width=800,height=700,left=-1000,top=-1000`;
-    open("/call", "test", params);
+    open("/call", "test", params); // Open call window
   };
 
-  const currentMessages = messages[receiverId] || [];
-
   // ================================
-  // 🔹 Conditional UI Rendering
+  // 🔹 7. Conditional UI Rendering
   // ================================
   if (!showMessage) return null;
 
@@ -159,7 +233,6 @@ const Message = ({ showMessage }) => {
       {selectedFriend ? (
         <div>
           <ChatHeader
-            isFriendOnline={isFriendOnline}
             openCallNotification={openCallNotification}
             handleCall={handleCall}
           />
@@ -178,6 +251,7 @@ const Message = ({ showMessage }) => {
             message={message}
             setMessage={setMessage}
             sendMessage={sendMessage}
+            inputId="message-input"
           />
         </div>
       ) : (
