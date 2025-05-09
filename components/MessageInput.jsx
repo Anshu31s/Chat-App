@@ -16,11 +16,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import EmojiPicker from "emoji-picker-react";
 import { useRef, useState } from "react";
+// Utility function to determine file type
+const detectFileType = (file) => {
+  const type = file.type;
+  if (type.startsWith("image/")) return "image";
+  if (type.startsWith("video/")) return "video";
+  return "document";
+};
+const isFileSizeValid = (file, maxSizeMB = 50) => {
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
+  return file.size <= maxSizeBytes;
+};
 
 const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
   const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
-  const dropdownRef = useRef(null);
 
   const [previewUrl, setPreviewUrl] = useState(null);
   const [fileType, setFileType] = useState(null);
@@ -42,11 +52,12 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setPreviewUrl(URL.createObjectURL(file));
-      setFileType("image");
-      if (dropdownRef.current) {
-        dropdownRef.current.click();
+      if (!isFileSizeValid(file)) {
+        alert("File size exceeds 50MB limit.");
+        return;
       }
+      setPreviewUrl(URL.createObjectURL(file));
+      setFileType(detectFileType(file));
       setSelectedFile(file);
     }
   };
@@ -54,13 +65,13 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setPreviewUrl(file.name);
-      setFileType("document");
-      setSelectedFile(file);
-      // Close the dropdown
-      if (dropdownRef.current) {
-        dropdownRef.current.click();
+      if (!isFileSizeValid(file)) {
+        alert("File size exceeds 50MB limit.");
+        return;
       }
+      setPreviewUrl(file.name);
+      setFileType(detectFileType(file));
+      setSelectedFile(file);
     }
   };
 
@@ -75,7 +86,7 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
   // 🔹 Modified Send Handler
   const handleSend = () => {
     if (selectedFile) {
-      sendMessage(selectedFile, fileType);
+      sendMessage(selectedFile);
       removePreview();
     } else if (message.trim()) {
       sendMessage();
@@ -87,12 +98,20 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
       {previewUrl && (
         <div className="relative mb-2 flex items-center gap-3">
           <div className="flex items-center">
-            {fileType === "image" ? (
-              <img
-                src={previewUrl}
-                alt="Preview"
-                className="w-16 h-16 object-cover rounded border"
-              />
+            {fileType === "image" || fileType === "video" ? (
+              fileType === "video" ? (
+                <video
+                  src={previewUrl}
+                  className="w-16 h-16 object-cover rounded border"
+                  controls
+                />
+              ) : (
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="w-16 h-16 object-cover rounded border"
+                />
+              )
             ) : (
               <div className="flex items-center px-3 py-2 bg-white rounded border">
                 <FileIcon className="mr-2 w-5 h-5 text-gray-500" />
@@ -132,7 +151,7 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
             </div>
           )}
           <DropdownMenu>
-            <DropdownMenuTrigger ref={dropdownRef}>
+            <DropdownMenuTrigger>
               <Paperclip className="text-gray-400 w-5 h-5" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-44">
@@ -159,7 +178,7 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
 
         <input
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
           ref={imageInputRef}
           onChange={handleImageChange}
           className="hidden"
@@ -184,8 +203,7 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
               sendMessage();
             }
           }}
-          onFocus={() => setShowEmojiPicker(false)
-          }
+          onFocus={() => setShowEmojiPicker(false)}
           aria-label="Type a message"
         />
 

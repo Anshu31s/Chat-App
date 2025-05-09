@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ChatStore from "@/(store)/ChatStore";
 import axios from "axios";
+import useFriendStore from "@/(store)/FriendStore";
 import { DateTimeFormatter } from "./hooks/DateTimeFormatter";
 const ChatHeader = ({ openCallNotification, handleCall }) => {
   const { selectedFriend, onlineUsers, typingStatus } = ChatStore();
@@ -14,6 +15,7 @@ const ChatHeader = ({ openCallNotification, handleCall }) => {
   const isFriendOnline = onlineUsers.includes(receiverId);
   const isTyping = typingStatus[receiverId] || false;
   const clearSelectedFriend = ChatStore((state) => state.clearSelectedFriend);
+  const { fetchFriends } = useFriendStore();
   const { formatDate } = DateTimeFormatter();
 
   const deleteFriendAndChats = async () => {
@@ -32,7 +34,7 @@ const ChatHeader = ({ openCallNotification, handleCall }) => {
       });
       // Delete chat history
       await axios.delete(`/api/messages/${selectedFriend.id}`);
-
+      fetchFriends();
       clearSelectedFriend();
     } catch (error) {
       console.error(

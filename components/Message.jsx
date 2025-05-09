@@ -177,27 +177,26 @@ const Message = ({ showMessage }) => {
   const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
-  
+
     try {
       const response = await axios.post("/api/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
       // Get the file URL from the response
       const { fileUrl } = response.data;
       if (!fileUrl) {
         throw new Error("No file URL returned from server");
       }
-  
+
       return fileUrl;
     } catch (error) {
       console.error("Error uploading file:", error);
       throw new Error("Failed to upload file.");
     }
   };
-  
 
   // ================================
   // 🔹 7. Message Sending Handler
@@ -208,8 +207,30 @@ const Message = ({ showMessage }) => {
     let messageContent = message;
 
     if (file) {
-      messageType = fileType === "image" ? "image" : "document";
-      messageContent = fileType === "image" ? URL.createObjectURL(file) : file.name;
+      const fileType = file.type.startsWith("image/")
+        ? "image"
+        : file.type.startsWith("video/")
+        ? "video"
+        : file.type.startsWith("application/pdf")
+        ? "pdf"
+        : file.type.startsWith("application/msword") ||
+          file.type.startsWith(
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          )
+        ? "word"
+        : file.type.startsWith("application/vnd.ms-excel") ||
+          file.type.startsWith(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          )
+        ? "excel"
+        : file.type.startsWith("application/vnd.ms-powerpoint")
+        ? "ppt"
+        : "document";
+      messageType = fileType;
+      messageContent = messageContent =
+        fileType === "image" || fileType === "video"
+          ? URL.createObjectURL(file)
+          : file.name;
     }
 
     if (receiverId && (messageContent || file) && senderId) {
@@ -226,25 +247,24 @@ const Message = ({ showMessage }) => {
         [receiverId]: [...(prevMessages[receiverId] || []), newMessage],
       }));
 
-      let finalMessageContent = messageContent;
-      if (file) {
+   if (file) {
         // Upload file after showing in UI
         try {
           const fileUrl = await uploadFile(file);
-          finalMessageContent = fileUrl;
+          messageContent = fileUrl;
 
           // Update local messages with final file URL
-          setMessages((prevMessages) => {
-            const updatedMessages = (prevMessages[receiverId] || []).map((msg) =>
-              msg.time === time && msg.senderId === senderId
-                ? { ...msg, message: fileUrl }
-                : msg
-            );
-            return {
-              ...prevMessages,
-              [receiverId]: updatedMessages,
-            };
-          });
+          // setMessages((prevMessages) => {
+          //   const updatedMessages = (prevMessages[receiverId] || []).map((msg) =>
+          //     msg.time === time && msg.senderId === senderId
+          //       ? { ...msg, message: fileUrl }
+          //       : msg
+          //   );
+          //   return {
+          //     ...prevMessages,
+          //     [receiverId]: updatedMessages,
+          //   };
+          // });
         } catch (error) {
           setError("Failed to upload file. Please try again.");
           return;
@@ -255,7 +275,7 @@ const Message = ({ showMessage }) => {
       socket.emit("privateMessage", {
         senderId,
         receiverId,
-        message: finalMessageContent,
+        message: messageContent,
         messageType,
         time,
       });

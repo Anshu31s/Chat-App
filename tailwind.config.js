@@ -6,7 +6,9 @@ export const content = [
 	"./components/**/*.{js,ts,jsx,tsx,mdx}",
 	"./app/**/*.{js,ts,jsx,tsx,mdx}",
 ];
+
 export const theme = {
+	
 	extend: {
 		colors: {
 			background: 'hsl(var(--background))',
@@ -55,6 +57,8 @@ export const theme = {
 			md: 'calc(var(--radius) - 2px)',
 			sm: 'calc(var(--radius) - 4px)'
 		}
+		
 	}
+	
 };
 export const plugins = [animate];

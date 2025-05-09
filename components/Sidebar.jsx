@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Search, UserRoundPlus, LogOut, MessageSquareText } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -7,15 +7,17 @@ import useUnreadMessages from "./hooks/useUnreadMessages";
 import { useSession, signOut } from "next-auth/react";
 import { useDebounceCallback } from "usehooks-ts";
 import GetUser from "./hooks/GetUser";
-import FriendDetails from "./hooks/GetFriend";
+import useFriendStore from "@/(store)/FriendStore";
 import ChatStore from "@/(store)/ChatStore";
+import { toast } from "sonner";
 
 const Sidebar = ({ showSidebar }) => {
   const [query, setQuery] = useState("");
   const debounced = useDebounceCallback(setQuery, 500);
   const { data: session } = useSession();
   const { users, userError, loadingUsers } = GetUser(query);
-  const { friends, loadingFriends, friendError, refetch } = FriendDetails();
+  const { friends, loadingFriends, friendError, fetchFriends } =
+    useFriendStore();
 
   const setSelectedFriend = ChatStore((state) => state.setSelectedFriend);
   const [clickedUsers, setClickedUsers] = useState(new Set());
@@ -26,14 +28,20 @@ const Sidebar = ({ showSidebar }) => {
   const userId = session?.user?.id;
   const { error: unreadError, refetch: refetchUnreadCounts } =
     useUnreadMessages(userId);
+  console.log(unreadError);
+  useEffect(() => {
+    fetchFriends();
+  }, []);
 
   const handleAddFriend = async (friendId) => {
     if (clickedUsers.has(friendId)) return;
+    setClickedUsers((prev) => new Set(prev).add(friendId));
     try {
       const response = await axios.post("/api/friends", { friend: friendId });
-      refetch();
       if (response.status >= 200 && response.status < 300) {
-        setClickedUsers((prev) => new Set(prev).add(friendId));
+        fetchFriends();
+        setQuery("");
+        toast("Friend is added successfully.");
       } else {
         throw new Error("Network response was not ok");
       }

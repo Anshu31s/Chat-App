@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import NextAuthProvider from "./Authprovider";
-
+import { Toaster } from "@/components/ui/sonner"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,6 +28,7 @@ export default function RootLayout({ children }) {
         <NextAuthProvider>
         {children}
         </NextAuthProvider>
+        <Toaster />
       </body>
     </html>
   );
