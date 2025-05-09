@@ -74,11 +74,12 @@ const Message = ({ showMessage }) => {
     return () => {
       socket.off("privateMessage");
       socket.off("onlineUsers");
+      socket.off("typing");
     };
   }, [senderId, receiverId, setOnlineUsers, setTypingStatus, addUnreadMessage]);
 
   // ================================
-  // 🔹 4. Handle Typing Events
+  // 🔹 3. Handle Typing Events
   // ================================
   useEffect(() => {
     if (!senderId || !receiverId) return;
@@ -144,7 +145,9 @@ const Message = ({ showMessage }) => {
     loadMessages();
   }, [senderId, receiverId]);
 
-  // Mark messages as read when selecting a friend
+  // ================================
+  // 🔹 5. Mark Messages as Read
+  // ================================
   useEffect(() => {
     if (!senderId || !receiverId) return;
 
@@ -156,7 +159,6 @@ const Message = ({ showMessage }) => {
         });
         if (response.data.success) {
           ChatStore.getState().clearUnreadMessages(receiverId);
-          // Trigger a refetch of unread counts (optional, see Sidebar)
         } else {
           throw new Error("Failed to mark messages as read");
         }
@@ -168,37 +170,95 @@ const Message = ({ showMessage }) => {
 
     markMessagesAsRead();
   }, [senderId, receiverId]);
-  // ================================
-  // 🔹 5. Message Sending Handler
-  // ================================
-  const sendMessage = () => {
-    const time = new Date().toISOString();
-    const messageType = "text";
 
-    if (receiverId && message && senderId) {
-      // Emit message via socket
+  // ================================
+  // 🔹 6. File Upload Handler
+  // ================================
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+  
+    try {
+      const response = await axios.post("/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
+      // Get the file URL from the response
+      const { fileUrl } = response.data;
+      if (!fileUrl) {
+        throw new Error("No file URL returned from server");
+      }
+  
+      return fileUrl;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      throw new Error("Failed to upload file.");
+    }
+  };
+  
+
+  // ================================
+  // 🔹 7. Message Sending Handler
+  // ================================
+  const sendMessage = async (file = null, fileType = null) => {
+    const time = new Date().toISOString();
+    let messageType = "text";
+    let messageContent = message;
+
+    if (file) {
+      messageType = fileType === "image" ? "image" : "document";
+      messageContent = fileType === "image" ? URL.createObjectURL(file) : file.name;
+    }
+
+    if (receiverId && (messageContent || file) && senderId) {
+      // Immediately update local messages state
+      const newMessage = {
+        senderId,
+        message: messageContent,
+        messageType,
+        time,
+        type: "outgoing",
+      };
+      setMessages((prevMessages) => ({
+        ...prevMessages,
+        [receiverId]: [...(prevMessages[receiverId] || []), newMessage],
+      }));
+
+      let finalMessageContent = messageContent;
+      if (file) {
+        // Upload file after showing in UI
+        try {
+          const fileUrl = await uploadFile(file);
+          finalMessageContent = fileUrl;
+
+          // Update local messages with final file URL
+          setMessages((prevMessages) => {
+            const updatedMessages = (prevMessages[receiverId] || []).map((msg) =>
+              msg.time === time && msg.senderId === senderId
+                ? { ...msg, message: fileUrl }
+                : msg
+            );
+            return {
+              ...prevMessages,
+              [receiverId]: updatedMessages,
+            };
+          });
+        } catch (error) {
+          setError("Failed to upload file. Please try again.");
+          return;
+        }
+      }
+
+      // Emit message via socket after upload (for files) or immediately (for text)
       socket.emit("privateMessage", {
         senderId,
         receiverId,
-        message,
+        message: finalMessageContent,
         messageType,
         time,
       });
-
-      // Update local messages state
-      setMessages((prevMessages) => ({
-        ...prevMessages,
-        [receiverId]: [
-          ...(prevMessages[receiverId] || []),
-          {
-            senderId,
-            message,
-            messageType,
-            time,
-            type: "outgoing",
-          },
-        ],
-      }));
 
       // Clear input field
       setMessage("");
@@ -207,7 +267,7 @@ const Message = ({ showMessage }) => {
   };
 
   // ================================
-  // 🔹 6. Call Notification Handlers
+  // 🔹 8. Call Notification Handlers
   // ================================
   const openCallNotification = () => {
     setCallNotification(true);
@@ -224,7 +284,7 @@ const Message = ({ showMessage }) => {
   };
 
   // ================================
-  // 🔹 7. Conditional UI Rendering
+  // 🔹 9. Conditional UI Rendering
   // ================================
   if (!showMessage) return null;
 

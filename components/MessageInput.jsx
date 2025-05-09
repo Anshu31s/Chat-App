@@ -17,12 +17,14 @@ import {
 import EmojiPicker from "emoji-picker-react";
 import { useRef, useState } from "react";
 
-const MessageInput = ({ message, setMessage, sendMessage,inputId }) => {
+const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
   const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const [previewUrl, setPreviewUrl] = useState(null);
   const [fileType, setFileType] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // 🔹 Emoji Picker Handlers
@@ -35,11 +37,17 @@ const MessageInput = ({ message, setMessage, sendMessage,inputId }) => {
     setMessage((prevMessage) => prevMessage + emojiObject.emoji);
     setShowEmojiPicker(false);
   };
+
+  // 🔹 File Selection Handlers
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setPreviewUrl(URL.createObjectURL(file));
       setFileType("image");
+      if (dropdownRef.current) {
+        dropdownRef.current.click();
+      }
+      setSelectedFile(file);
     }
   };
 
@@ -48,14 +56,30 @@ const MessageInput = ({ message, setMessage, sendMessage,inputId }) => {
     if (file) {
       setPreviewUrl(file.name);
       setFileType("document");
+      setSelectedFile(file);
+      // Close the dropdown
+      if (dropdownRef.current) {
+        dropdownRef.current.click();
+      }
     }
   };
 
+  // 🔹 Remove Preview
   const removePreview = () => {
     setPreviewUrl(null);
     setFileType(null);
+    setSelectedFile(null);
     imageInputRef.current.value = "";
     fileInputRef.current.value = "";
+  };
+  // 🔹 Modified Send Handler
+  const handleSend = () => {
+    if (selectedFile) {
+      sendMessage(selectedFile, fileType);
+      removePreview();
+    } else if (message.trim()) {
+      sendMessage();
+    }
   };
 
   return (
@@ -108,7 +132,7 @@ const MessageInput = ({ message, setMessage, sendMessage,inputId }) => {
             </div>
           )}
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger ref={dropdownRef}>
               <Paperclip className="text-gray-400 w-5 h-5" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-44">
@@ -160,14 +184,15 @@ const MessageInput = ({ message, setMessage, sendMessage,inputId }) => {
               sendMessage();
             }
           }}
-          onFocus={() => setShowEmojiPicker(false)}
+          onFocus={() => setShowEmojiPicker(false)
+          }
           aria-label="Type a message"
         />
 
         {message || previewUrl ? (
           <button
             type="submit"
-            onClick={sendMessage}
+            onClick={handleSend}
             className="ml-2 p-2 text-gray-400"
             aria-label="Send message"
           >
