@@ -5,7 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import Message from "@/components/Message";
 import { useSession } from "next-auth/react";
 import Loader from "@/components/Loader";
-const page = () => {
+const Page = () => {
   const { status } = useSession();
   const selectedFriend = ChatStore((state) => state.selectedFriend);
   const [showSidebar, setShowSidebar] = useState(true);
@@ -50,4 +50,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

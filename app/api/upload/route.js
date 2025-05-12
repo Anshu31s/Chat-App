@@ -2,11 +2,10 @@ import { BlobServiceClient } from '@azure/storage-blob';
 import { NextResponse } from 'next/server';
 
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
+export const routeSegmentConfig = {
+  runtime: 'nodejs',
 };
+
 
 const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
 const CONTAINER_NAME = process.env.AZURE_CONTAINER_NAME;

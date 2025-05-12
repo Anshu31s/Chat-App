@@ -1,4 +1,5 @@
 import { Phone, PhoneOff } from "lucide-react";
+import Image from "next/image";
 import React from "react";
 import { useState, useEffect } from "react";
 import SimplePeer from "simple-peer";
@@ -11,7 +12,7 @@ const CallNotification = ({ onDecline }) => {
     <div className="fixed bg-opacity-50 inset-0 w-full flex justify-center items-center h-screen z-50 bg-black">
       <div className="bg-white shadow-lg shadow-black/20 text-white rounded-lg p-2 border">
         <div className="flex flex-col items-center justify-center shadow-inner shadow-gray-200 px-20 py-2 border rounded-xl ">
-          <img
+          <Image
             src="https://via.placeholder.com/150"
             alt="Profile"
             className="rounded-full w-24 h-24"

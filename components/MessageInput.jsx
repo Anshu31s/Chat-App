@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import EmojiPicker from "emoji-picker-react";
 import { useRef, useState } from "react";
+import Image from "next/image";
 // Utility function to determine file type
 const detectFileType = (file) => {
   const type = file.type;
@@ -106,7 +107,7 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
                   controls
                 />
               ) : (
-                <img
+                <Image
                   src={previewUrl}
                   alt="Preview"
                   className="w-16 h-16 object-cover rounded border"

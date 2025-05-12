@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import ChatStore from "@/(store)/ChatStore";
 
-const useUnreadMessages = (userId) => {
+const UnreadMessages = (userId) => {
   const { setUnreadMessages } = ChatStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -32,4 +32,4 @@ const useUnreadMessages = (userId) => {
   return { loading, error, refetch: fetchUnreadCounts };
 };
 
-export default useUnreadMessages;
+export default UnreadMessages;

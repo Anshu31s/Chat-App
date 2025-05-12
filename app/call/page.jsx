@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react";
 import ChatStore from "@/(store)/ChatStore";
 import React, { useState, useRef, useEffect } from "react";
 import { Mic, Camera, PhoneOff, MicOff, CameraOff } from "lucide-react";
-
+import Image from "next/image";
 const CallInterface = () => {
   const { selectedFriend } = ChatStore();
   const { session } = useSession();
@@ -15,23 +15,24 @@ const CallInterface = () => {
   const remoteUserId = selectedFriend?.id;
   const localUserId = session?.user?.id;
 
-  const remoteVideo = useRef(null);  
+  const remoteVideo = useRef(null);
   const localVideo = useRef(null);
-
+  const localStreamRef = useRef(null);
   useEffect(() => {
     startVoiceCall();
 
     return () => {
-      if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
 
-  const startVoiceCall = async () => {
+ const startVoiceCall = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       setLocalStream(stream);
+      localStreamRef.current = stream;
     } catch (error) {
       console.error("Error accessing audio:", error);
     }
@@ -40,7 +41,10 @@ const CallInterface = () => {
   const toggleCamera = async () => {
     if (!CameraOn) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: MicOn });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: MicOn,
+        });
         setLocalStream(stream);
         setCamera(true);
 
@@ -62,7 +66,7 @@ const CallInterface = () => {
 
   const toggleMic = () => {
     if (localStream) {
-      localStream.getAudioTracks().forEach(track => (track.enabled = !MicOn));
+      localStream.getAudioTracks().forEach((track) => (track.enabled = !MicOn));
     }
     setMic((prev) => !prev);
   };
@@ -84,7 +88,7 @@ const CallInterface = () => {
         <div className="flex flex-col items-center justify-center border rounded-xl w-full h-[90%]">
           {bothCamerasOff ? (
             <div className="">
-              <img
+              <Image
                 src="https://via.placeholder.com/150"
                 alt="Profile"
                 className="rounded-full w-24 h-24"

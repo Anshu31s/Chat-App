@@ -9,6 +9,7 @@ import ChatStore from "@/(store)/ChatStore";
 import axios from "axios";
 import useFriendStore from "@/(store)/FriendStore";
 import { DateTimeFormatter } from "./hooks/DateTimeFormatter";
+import Image from "next/image";
 const ChatHeader = ({ openCallNotification, handleCall }) => {
   const { selectedFriend, onlineUsers, typingStatus } = ChatStore();
   const receiverId = selectedFriend?.id;
@@ -51,7 +52,7 @@ const ChatHeader = ({ openCallNotification, handleCall }) => {
         <button onClick={clearSelectedFriend} className="block md:hidden">
           <ArrowLeft />
         </button>
-        <img
+        <Image
           src={selectedFriend.image || "/profile.jpg"}
           alt="Profile"
           className="rounded-full w-10 h-10 mr-3"
@@ -82,7 +83,7 @@ const ChatHeader = ({ openCallNotification, handleCall }) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="mr-4">
             <DropdownMenuItem className="flex w-64 border-none flex-col items-center justify-center rounded-lg border pb-10">
-              <img
+              <Image
                 className="mb-3 h-24 w-24 rounded-full shadow-lg"
                 src={selectedFriend.image}
                 alt="Bonnie image"
