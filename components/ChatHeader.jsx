@@ -56,6 +56,8 @@ const ChatHeader = ({ openCallNotification, handleCall }) => {
           src={selectedFriend.image || "/profile.jpg"}
           alt="Profile"
           className="rounded-full w-10 h-10 mr-3"
+          width={40}
+          height={40}
         />
         <span className="text-xs">
           <h2 className="text-[0.90rem] font-bold">{selectedFriend.name}</h2>
@@ -84,9 +86,11 @@ const ChatHeader = ({ openCallNotification, handleCall }) => {
           <DropdownMenuContent className="mr-4">
             <DropdownMenuItem className="flex w-64 border-none flex-col items-center justify-center rounded-lg border pb-10">
               <Image
-                className="mb-3 h-24 w-24 rounded-full shadow-lg"
+                className="mb-3 rounded-full shadow-lg"
                 src={selectedFriend.image}
                 alt="Bonnie image"
+                width={96}
+                height={96}
               />
               <h3 className="mb-1 text-xl capitalize font-medium text-gray-900">
                 {selectedFriend.name}

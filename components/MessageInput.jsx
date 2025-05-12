@@ -110,7 +110,9 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
                 <Image
                   src={previewUrl}
                   alt="Preview"
-                  className="w-16 h-16 object-cover rounded border"
+                  className="object-cover rounded border"
+                   width={64}
+                  height={64}
                 />
               )
             ) : (

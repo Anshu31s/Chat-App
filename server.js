@@ -7,6 +7,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 // STEP 2: Initialize the Next.js app
+const port = parseInt(process.env.PORT || "8000", 10);
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -119,8 +120,12 @@ app.prepare().then(() => {
   });
 
   // STEP 13: Start the server on port 3000
-  server.listen(3000, (err) => {
+  server.listen(port, (err) => {
     if (err) throw err;
-    console.log("> Server is running at http://localhost:3000");
+    console.log(
+      `> Server listening at http://localhost:${port} as ${
+        dev ? "development" : process.env.NODE_ENV
+      }`
+    );
   });
 });

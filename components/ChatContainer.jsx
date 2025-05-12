@@ -5,7 +5,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { DateTimeFormatter } from "./hooks/DateTimeFormatter";
 import { FileIcon } from "lucide-react";
-import { FaRegFilePdf,FaRegFileWord  } from "react-icons/fa6";
+import { FaRegFilePdf, FaRegFileWord } from "react-icons/fa6";
 import { BsFiletypePpt } from "react-icons/bs";
 import Image from "next/image";
 
@@ -28,10 +28,13 @@ const ChatContainer = ({ currentMessages }) => {
           <Image
             src={msg.message}
             alt="Shared image"
+            width={800}
+            height={800}
+            layout="responsive"
             className="max-w-xs rounded-lg"
           />
         );
-        case "video":
+      case "video":
         return (
           <video
             src={msg.message}
@@ -48,11 +51,11 @@ const ChatContainer = ({ currentMessages }) => {
             rel="noopener noreferrer"
             className="flex items-center text-blue-100 hover:underline"
           >
-            <FaRegFilePdf  className="w-5 h-5 mr-2" />
+            <FaRegFilePdf className="w-5 h-5 mr-2" />
             <span>View Document</span>
           </a>
         );
-        case "word":
+      case "word":
         return (
           <a
             href={msg.message}
@@ -60,11 +63,11 @@ const ChatContainer = ({ currentMessages }) => {
             rel="noopener noreferrer"
             className="flex items-center text-blue-100 hover:underline"
           >
-            <FaRegFileWord  className="w-5 h-5 mr-2" />
+            <FaRegFileWord className="w-5 h-5 mr-2" />
             <span>View Document</span>
           </a>
         );
-        case "excel":
+      case "excel":
         return (
           <a
             href={msg.message}
@@ -72,11 +75,11 @@ const ChatContainer = ({ currentMessages }) => {
             rel="noopener noreferrer"
             className="flex items-center text-blue-100 hover:underline"
           >
-            <FileIcon  className="w-5 h-5 mr-2" />
+            <FileIcon className="w-5 h-5 mr-2" />
             <span>View Document</span>
           </a>
         );
-        case "ppt":
+      case "ppt":
         return (
           <a
             href={msg.message}
@@ -88,7 +91,7 @@ const ChatContainer = ({ currentMessages }) => {
             <span>View Document</span>
           </a>
         );
-        case "document":
+      case "document":
         return (
           <a
             href={msg.message}
@@ -119,9 +122,11 @@ const ChatContainer = ({ currentMessages }) => {
                 className="flex items-center justify-start mb-4 ml-2"
               >
                 <Image
-                  className="w-8 h-8 rounded-full mr-2 shadow-md"
+                  className="rounded-full mr-2 shadow-md"
                   src={selectedFriend.image || "/profile.jpg"}
                   alt="Sender Avatar"
+                  width={32}
+                  height={32}
                 />
                 <div className="select-text items-end bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-2 shadow-lg max-w-md hover:shadow-xl">
                   <div className="text-white text-sm">
@@ -148,9 +153,11 @@ const ChatContainer = ({ currentMessages }) => {
                   </span>
                 </div>
                 <Image
-                  className="w-8 h-8 rounded-full ml-2 shadow-md"
+                  className="rounded-full ml-2 shadow-md"
                   src={session.user.image || "/profile.jpg"}
                   alt="Avatar"
+                  width={32}
+                  height={32}
                 />
               </div>
             );

@@ -15,7 +15,9 @@ const CallNotification = ({ onDecline }) => {
           <Image
             src="https://via.placeholder.com/150"
             alt="Profile"
-            className="rounded-full w-24 h-24"
+            className="rounded-full"
+            width={96}
+            height={96}
           />
           <div className="text-center text-black">
             <h2 className="text-sm mt-2 font-thin">Users</h2>

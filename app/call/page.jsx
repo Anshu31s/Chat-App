@@ -28,7 +28,7 @@ const CallInterface = () => {
     };
   }, []);
 
- const startVoiceCall = async () => {
+  const startVoiceCall = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       setLocalStream(stream);
@@ -91,7 +91,9 @@ const CallInterface = () => {
               <Image
                 src="https://via.placeholder.com/150"
                 alt="Profile"
-                className="rounded-full w-24 h-24"
+                className="rounded-full"
+                width={96}
+                height={96}
               />
               <div className="text-center">
                 <h2 className="text-white text-2xl mt-4">John</h2>

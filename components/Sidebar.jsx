@@ -64,7 +64,9 @@ const Sidebar = ({ showSidebar }) => {
       <aside className="fixed md:static flex flex-row md:flex-col max-[768px]:p-5 max-[768px]:justify-evenly md:w-[14%] w-full md:py-4 items-center bg-gray-200 text-gray-800 shadow">
         {session?.user && (
           <Image
-            className="h-8 w-8 outline outline-green-500 outline-offset-2 rounded-full"
+            width={32}
+            height={32}
+            className="outline outline-green-500 outline-offset-2 rounded-full"
             src={session.user.image || "/profile.jpg"}
             alt="user Avatar"
           />
@@ -136,7 +138,9 @@ const Sidebar = ({ showSidebar }) => {
                     <Image
                       src={user.image || "/profile.jpg"}
                       alt={user.name}
-                      className="rounded-full outline outline-gray-500 w-12 h-12 mr-3"
+                      className="rounded-full outline outline-gray-500 mr-3"
+                      width={48}
+                      height={48}
                     />
                     <div className="w-full flex justify-between ml-2">
                       <div>
@@ -180,7 +184,7 @@ const Sidebar = ({ showSidebar }) => {
                   <button
                     key={friend.id}
                     onClick={() => handleSelectFriend(friend)}
-                     data-selected={selectedFriend?.id === friend.id}
+                    data-selected={selectedFriend?.id === friend.id}
                     className={`flex items-center p-3 m-1 rounded-lg w-full text-left transition-colors ${
                       selectedFriend?.id === friend.id
                         ? "bg-gray-300"
@@ -190,7 +194,9 @@ const Sidebar = ({ showSidebar }) => {
                     <Image
                       src={friend.image || "/profile.jpg"}
                       alt={friend.name}
-                      className="rounded-full outline outline-gray-500 w-10 h-10 mr-3"
+                      className="rounded-full outline outline-gray-500 mr-3"
+                      width={40}
+                      height={40}
                     />
                     <div className="w-full flex justify-between ml-2">
                       <div className="text-left">
