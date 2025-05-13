@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      "lh3.googleusercontent.com",
-      "chatmsgstore01.blob.core.windows.net",
-    ],
     remotePatterns: [
       {
         protocol: "https",

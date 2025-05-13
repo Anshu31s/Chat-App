@@ -32,6 +32,7 @@
     "react-markdown": "^10.1.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
+    "sharp": "^0.34.1",
     "simple-peer": "^9.11.1",
     "socket.io": "^4.8.0",
     "socket.io-client": "^4.8.0",
