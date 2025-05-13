@@ -29,7 +29,6 @@ const Sidebar = ({ showSidebar }) => {
   const userId = session?.user?.id;
   const { error: unreadError, refetch: refetchUnreadCounts } =
     UnreadMessages(userId);
-  console.log(unreadError);
   useEffect(() => {
     fetchFriends();
   }, [fetchFriends]);
@@ -61,7 +60,7 @@ const Sidebar = ({ showSidebar }) => {
 
   return (
     <div className="border-black flex flex-col-reverse w-full md:flex-row bg-gray-100 text-black border-x md:w-[25%] h-full fixed">
-      <aside className="fixed md:static flex flex-row md:flex-col max-[768px]:p-5 max-[768px]:justify-evenly md:w-[14%] w-full md:py-4 items-center bg-gray-200 text-gray-800 shadow">
+      <aside className="fixed md:static flex flex-row md:flex-col justify-evenly md:justify-normal p-2 w-full md:w-auto md:py-4 items-center bg-gray-200 text-gray-800 shadow">
         {session?.user && (
           <Image
             width={32}

@@ -47,31 +47,35 @@ const ChatHeader = ({ openCallNotification, handleCall }) => {
   };
 
   return (
-    <div className="w-full top-0 sticky flex justify-between items-center p-2 border-y bg-gray-100">
-      <div className="flex items-center">
+    <div className="w-[75%] top-0 fixed z-10 flex justify-between items-center p-2 border-y bg-gray-100">
+      {/* Left section: back button + profile */}
+      <div className="flex items-center space-x-3 overflow-hidden">
         <button onClick={clearSelectedFriend} className="block md:hidden">
           <ArrowLeft />
         </button>
         <Image
           src={selectedFriend.image || "/profile.jpg"}
           alt="Profile"
-          className="rounded-full w-10 h-10 mr-3"
+          className="rounded-full w-10 h-10"
           width={40}
           height={40}
         />
-        <span className="text-xs">
-          <h2 className="text-[0.90rem] font-bold">{selectedFriend.name}</h2>
-          {isTyping ? (
-            "typing..."
-          ) : isFriendOnline ? (
-            <p className="text-green-500">online</p>
-          ) : (
-            `last seen ${formatDate(selectedFriend.lastOnline)}`
-          )}
-        </span>
+        <div className="flex flex-col min-w-0">
+          <h2 className="text-sm font-bold truncate">{selectedFriend.name}</h2>
+          <span className="text-xs text-gray-600 truncate">
+            {isTyping ? (
+              "typing..."
+            ) : isFriendOnline ? (
+              <span className="text-green-500">online</span>
+            ) : (
+              `last seen ${formatDate(selectedFriend.lastOnline)}`
+            )}
+          </span>
+        </div>
       </div>
-      <div className="flex justify-between w-32 items-center">
-        <div className="flex justify-between w-20 bg-gray-200 rounded-md p-2">
+{/* Right section: action icons */}
+  <div className="flex items-center space-x-2">
+         <div className="flex items-center bg-gray-200 rounded-md px-2 py-1 space-x-2">
           <button>
             <Video onClick={openCallNotification} size={24} strokeWidth={1} />
           </button>
@@ -87,7 +91,7 @@ const ChatHeader = ({ openCallNotification, handleCall }) => {
             <DropdownMenuItem className="flex w-64 border-none flex-col items-center justify-center rounded-lg border pb-10">
               <Image
                 className="mb-3 rounded-full shadow-lg"
-                src={selectedFriend.image}
+                src={selectedFriend.image || '/profile.jpg'}
                 alt="Bonnie image"
                 width={96}
                 height={96}

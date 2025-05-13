@@ -15,9 +15,12 @@ const ChatContainer = ({ currentMessages }) => {
   const messageEndRef = useRef(null);
   const { formatDate } = DateTimeFormatter();
 
-  // 🔹 Scroll to bottom on new message
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const timeout = setTimeout(() => {
+      messageEndRef.current?.scrollIntoView({ behavior: "auto" });
+    }, 100); // give time for DOM + image/video render
+
+    return () => clearTimeout(timeout);
   }, [currentMessages]);
 
   // 🔹 Render message content based on messageType
@@ -110,61 +113,59 @@ const ChatContainer = ({ currentMessages }) => {
 
   return (
     <div
-      className="flex flex-col-reverse min-h-[83vh] h-auto max-h-[90vh] bg-gray-200 rounded-lg shadow-lg bg-contain bg-center"
+      className="flex flex-col flex-1 pb-12 overflow-y-auto bg-gray-200 bg-fixed bg-center"
       style={{ backgroundImage: "url('/mobile.png')" }}
     >
-      <div className="overflow-y-auto">
-        {currentMessages.map((msg, index) => {
-          if (msg.type === "incoming") {
-            return (
-              <div
-                key={index}
-                className="flex items-center justify-start mb-4 ml-2"
-              >
-                <Image
-                  className="rounded-full mr-2 shadow-md"
-                  src={selectedFriend.image || "/profile.jpg"}
-                  alt="Sender Avatar"
-                  width={32}
-                  height={32}
-                />
-                <div className="select-text items-end bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-2 shadow-lg max-w-md hover:shadow-xl">
-                  <div className="text-white text-sm">
-                    {renderMessageContent(msg)}
-                  </div>
-                  <p className="text-[8px] text-right text-blue-100">
-                    {formatDate(msg.time)}
-                  </p>
+      {currentMessages.map((msg, index) => {
+        if (msg.type === "incoming") {
+          return (
+            <div
+              key={index}
+              className="flex items-center justify-start mb-4 ml-2"
+            >
+              <Image
+                className="rounded-full mr-2 shadow-md"
+                src={selectedFriend.image || "/profile.jpg"}
+                alt="Sender Avatar"
+                width={32}
+                height={32}
+              />
+              <div className="select-text items-end bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-2 shadow-lg max-w-md hover:shadow-xl">
+                <div className="text-white text-sm">
+                  {renderMessageContent(msg)}
                 </div>
+                <p className="text-[8px] text-right text-blue-100">
+                  {formatDate(msg.time)}
+                </p>
               </div>
-            );
-          } else {
-            return (
-              <div
-                key={index}
-                className="flex items-center justify-end mb-4 mr-2"
-              >
-                <div className="flex flex-col select-text items-end bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-2 shadow-lg max-w-md hover:shadow-xl">
-                  <div className="text-white text-sm">
-                    {renderMessageContent(msg)}
-                  </div>
-                  <span className="text-[8px] text-left text-blue-100">
-                    {formatDate(msg.time)}
-                  </span>
+            </div>
+          );
+        } else {
+          return (
+            <div
+              key={index}
+              className="flex items-center justify-end mb-4 mr-2"
+            >
+              <div className="flex flex-col select-text items-end bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-2 shadow-lg max-w-md hover:shadow-xl">
+                <div className="text-white text-sm">
+                  {renderMessageContent(msg)}
                 </div>
-                <Image
-                  className="rounded-full ml-2 shadow-md"
-                  src={session.user.image || "/profile.jpg"}
-                  alt="Avatar"
-                  width={32}
-                  height={32}
-                />
+                <span className="text-[8px] text-left text-blue-100">
+                  {formatDate(msg.time)}
+                </span>
               </div>
-            );
-          }
-        })}
-        <div ref={messageEndRef} />
-      </div>
+              <Image
+                className="rounded-full ml-2 shadow-md"
+                src={session.user.image || "/profile.jpg"}
+                alt="Avatar"
+                width={32}
+                height={32}
+              />
+            </div>
+          );
+        }
+      })}
+      <div ref={messageEndRef} />
     </div>
   );
 };

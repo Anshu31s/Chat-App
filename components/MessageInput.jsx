@@ -1,7 +1,5 @@
 import {
-  Smile,
   Mic,
-  Paperclip,
   Image as ImageIcon,
   File as FileIcon,
   X,
@@ -17,6 +15,7 @@ import {
 import EmojiPicker from "emoji-picker-react";
 import { useRef, useState } from "react";
 import Image from "next/image";
+import { BsEmojiSmile, BsPaperclip } from "react-icons/bs";
 // Utility function to determine file type
 const detectFileType = (file) => {
   const type = file.type;
@@ -95,9 +94,9 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
   };
 
   return (
-    <div className="bottom-0 w-full flex flex-col p-2 border-y sticky bg-gray-100">
+    <div className="w-full bottom-0 bg-gray-100 fixed md:w-[75%]">
       {previewUrl && (
-        <div className="relative mb-2 flex items-center gap-3">
+        <div className="relative p-2 flex items-center gap-2">
           <div className="flex items-center">
             {fileType === "image" || fileType === "video" ? (
               fileType === "video" ? (
@@ -111,8 +110,8 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
                   src={previewUrl}
                   alt="Preview"
                   className="object-cover rounded border"
-                   width={64}
-                  height={64}
+                  width={200}
+                  height={200}
                 />
               )
             ) : (
@@ -125,7 +124,7 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
             )}
             <button
               onClick={removePreview}
-              className="absolute -top-2 -right-2 bg-white border rounded-full p-1"
+              className="absolute top-1 right-2 bg-white border rounded-full p-1"
               aria-label="Remove preview"
             >
               <X className="w-3 h-3 text-red-500" />
@@ -134,50 +133,48 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
         </div>
       )}
 
-      <div className="flex items-center">
-        <div className="w-20 flex justify-between relative">
-          <button
-            type="button"
-            className="text-gray-400 hover:text-gray-200"
-            onClick={toggleEmojiPicker}
-            aria-label="Toggle emoji picker"
-          >
-            <Smile className="w-5 h-5" />
-          </button>
-          {showEmojiPicker && (
-            <div className="absolute bottom-12 z-50">
-              <EmojiPicker
-                onEmojiClick={handleEmojiClick}
-                width={300}
-                height={400}
-              />
-            </div>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Paperclip className="text-gray-400 w-5 h-5" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-44">
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  imageInputRef.current.click();
-                }}
-              >
-                <ImageIcon className="mr-2" /> Photos & Videos
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  fileInputRef.current.click();
-                }}
-              >
-                <FileIcon className="mr-2" /> Document
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      <div className="p-2 border-y flex items-center bg-gray-100 gap-2">
+        <button
+          type="button"
+          className="text-gray-400 hover:text-gray-200"
+          onClick={toggleEmojiPicker}
+          aria-label="Toggle emoji picker"
+        >
+          <BsEmojiSmile className="w-5 h-5" />
+        </button>
+        {showEmojiPicker && (
+          <div className="absolute bottom-12 z-50">
+            <EmojiPicker
+              onEmojiClick={handleEmojiClick}
+              width={300}
+              height={400}
+            />
+          </div>
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <BsPaperclip   className="text-gray-400 w-5 h-5" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-44">
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                imageInputRef.current.click();
+              }}
+            >
+              <ImageIcon className="mr-2" /> Photos & Videos
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                fileInputRef.current.click();
+              }}
+            >
+              <FileIcon className="mr-2" /> Document
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <input
           type="file"
@@ -196,7 +193,7 @@ const MessageInput = ({ message, setMessage, sendMessage, inputId }) => {
         <textarea
           rows="1"
           placeholder="Type a message"
-          className="w-full resize-none px-4 py-2 mx-2 bg-transparent border-none outline-none"
+          className="w-full resize-none p-2 bg-transparent border-none outline-none"
           id={inputId}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
