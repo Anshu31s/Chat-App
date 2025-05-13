@@ -11,7 +11,6 @@ import Image from "next/image";
 import VideoMessage from "./VideoMessage";
 
 const ChatContainer = ({ currentMessages }) => {
-  const [isVideoLoaded, setVideoLoaded] = useState(false);
   const selectedFriend = ChatStore((state) => state.selectedFriend);
   const { data: session } = useSession();
   const messageEndRef = useRef(null);
