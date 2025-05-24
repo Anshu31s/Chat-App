@@ -47,7 +47,7 @@ const ChatHeader = ({ openCallNotification, handleCall }) => {
   };
 
   return (
-    <div className="w-[75%] top-0 fixed z-10 flex justify-between items-center p-2 border-y bg-gray-100">
+    <div className="w-full md:w-[75%] top-0 fixed z-10 flex justify-between items-center p-2 border-y bg-gray-100">
       {/* Left section: back button + profile */}
       <div className="flex items-center space-x-3 overflow-hidden">
         <button onClick={clearSelectedFriend} className="block md:hidden">
