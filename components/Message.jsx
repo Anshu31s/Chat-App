@@ -201,7 +201,7 @@ const Message = ({ showMessage }) => {
   // ================================
   // 🔹 7. Message Sending Handler
   // ================================
-  const sendMessage = async (file = null, fileType = null) => {
+  const sendMessage = async (file = null) => {
     const time = new Date().toISOString();
     let messageType = "text";
     let messageContent = message;
@@ -211,6 +211,8 @@ const Message = ({ showMessage }) => {
         ? "image"
         : file.type.startsWith("video/")
         ? "video"
+        : file.type.startsWith("audio/")
+        ? "audio"
         : file.type.startsWith("application/pdf")
         ? "pdf"
         : file.type.startsWith("application/msword") ||
@@ -227,8 +229,10 @@ const Message = ({ showMessage }) => {
         ? "ppt"
         : "document";
       messageType = fileType;
-      messageContent = messageContent =
-        fileType === "image" || fileType === "video"
+      messageContent =
+        messageType === "image" ||
+        messageType === "video" ||
+        messageType === "audio"
           ? URL.createObjectURL(file)
           : file.name;
     }
@@ -247,24 +251,24 @@ const Message = ({ showMessage }) => {
         [receiverId]: [...(prevMessages[receiverId] || []), newMessage],
       }));
 
-   if (file) {
+      if (file) {
         // Upload file after showing in UI
         try {
           const fileUrl = await uploadFile(file);
           messageContent = fileUrl;
 
           // Update local messages with final file URL
-          // setMessages((prevMessages) => {
-          //   const updatedMessages = (prevMessages[receiverId] || []).map((msg) =>
-          //     msg.time === time && msg.senderId === senderId
-          //       ? { ...msg, message: fileUrl }
-          //       : msg
-          //   );
-          //   return {
-          //     ...prevMessages,
-          //     [receiverId]: updatedMessages,
-          //   };
-          // });
+          setMessages((prevMessages) => {
+            const updatedMessages = (prevMessages[receiverId] || []).map((msg) =>
+              msg.time === time && msg.senderId === senderId
+                ? { ...msg, message: fileUrl }
+                : msg
+            );
+            return {
+              ...prevMessages,
+              [receiverId]: updatedMessages,
+            };
+          });
         } catch (error) {
           setError("Failed to upload file. Please try again.");
           return;

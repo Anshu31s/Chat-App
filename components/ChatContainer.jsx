@@ -39,7 +39,16 @@ const ChatContainer = ({ currentMessages }) => {
           />
         );
       case "video":
-         return <VideoMessage src={msg.message} />;
+        return <VideoMessage src={msg.message} />;
+      case "audio":
+        return (
+          <audio
+            src={msg.message}
+            controls
+            className="max-w-xs"
+            aria-label="Audio message"
+          />
+        );
       case "pdf":
         return (
           <a
